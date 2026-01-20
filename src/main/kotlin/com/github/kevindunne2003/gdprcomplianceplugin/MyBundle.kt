@@ -1,4 +1,4 @@
-package org.jetbrains.plugins.template
+package com.github.kevindunne2003.gdprcomplianceplugin
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
