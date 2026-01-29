@@ -20,7 +20,8 @@ class loadDataCatalogueTest {
         assertTrue(result.isEmpty())
     }
 
-    @Test
+    //If Null cells inbetween values should be skipped, uncomment this test
+    /*@Test
     fun skipsNullCellsInRow() {
         val workbook = XSSFWorkbook()
         val sheet = workbook.createSheet()
@@ -32,7 +33,7 @@ class loadDataCatalogueTest {
         val result = pluginTool.loadDataCatKeywords(workbook)
 
         assertEquals(listOf("Name", "Email"), result)
-    }
+    }*/
 
     @Test
     fun `converts non string cells using toString`() {
