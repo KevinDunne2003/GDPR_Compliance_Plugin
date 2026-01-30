@@ -7,9 +7,19 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.PsiErrorElementUtil
 import com.github.kevindunne2003.gdprcomplianceplugin.services.MyProjectService
+import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
+import java.nio.file.Paths
 
 @TestDataPath("\$CONTENT_ROOT/src/test/testData")
 class MyPluginTest : BasePlatformTestCase() {
+
+    override fun setUp() {
+        super.setUp()
+        VfsRootAccess.allowRootAccess(testRootDisposable, testDataPath)
+    }
+
+    override fun getTestDataPath(): String =
+        Paths.get(System.getProperty("user.dir"), "src", "test", "testData", "rename").toString()
 
     fun testXMLFile() {
         val psiFile = myFixture.configureByText(XmlFileType.INSTANCE, "<foo>bar</foo>")
@@ -35,5 +45,5 @@ class MyPluginTest : BasePlatformTestCase() {
         assertNotSame(projectService.getRandomNumber(), projectService.getRandomNumber())
     }
 
-    override fun getTestDataPath() = "src/test/testData/rename"
+    //override fun getTestDataPath() = "src/test/testData/rename"
 }
