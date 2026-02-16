@@ -12,6 +12,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.kevindunne2003.gdprcomplianceplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
         <postStartupActivity implementation="com.github.kevindunne2003.gdprcomplianceplugin.startup.MyProjectActivity" />
+
     </extensions>
     <actions>
         <action id="com.github.kevindunne2003.gdprcomplianceplugin.startup.RunPluginTool"

@@ -35,9 +35,14 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
 
-    //Apache POI used for reading excel files
+    //estImplementation(kotlin("test"))
+    //testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    //testImplementation("io.mockk:mockk:1.13.13")
+    //testImplementation(libs.apache.poi.ooxml)
+
     //implementation("org.apache.poi:poi-ooxml")
 
+    //Apache POI used for reading excel files
     implementation(libs.apache.poi.ooxml)
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
