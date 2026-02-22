@@ -10,21 +10,41 @@ import kotlin.collections.mutableListOf
 
 object CodeScanningEngine {
 
-    /*  This function iterates through the virtual file system of all open projects inside intellij
-        It parses these objects into PsiObjects
-    */
-    fun iterateThroughOpenProjectsFileSystem() {
-        var project: Project? = null
+    private var variableNamesInsideProject = mutableListOf<String>()
+    private var methodNamesInsideProject = mutableListOf<String>()
+    private var classNamesInsideProject = mutableListOf<String>()
 
-        //Loops all open projects in the IDE
-        for (i in ProjectManager.getInstance().openProjects.indices) {
-            project = ProjectManager.getInstance().openProjects[i]
-            val rootVirtualFile = project.baseDir ?: continue
+    fun getVariableNamesInsideProject(): MutableList<String> {
+        return variableNamesInsideProject
+    }
+
+    fun getMethodNamesInsideProject(): MutableList<String> {
+        return methodNamesInsideProject
+    }
+
+    fun getClassNamesInsideProject(): MutableList<String> {
+        return classNamesInsideProject
+    }
+
+    fun iterateThroughOpenProjectsFileSystem() {
+        var project = ProjectManager.getInstance().openProjects[0]
+            val rootVirtualFile = project.baseDir ?: return
 
             var psiJavaFiles = collectAllJavPsiFiles(project,rootVirtualFile)
 
             //Insert functionality of accessing these psiFiles with the functions provided
-        }
+            if(psiJavaFiles != null) {
+                for(i in 0 until psiJavaFiles.size){
+                    var variables = getAllVariableNamesInPSIClassObject(psiJavaFiles.get(i) as PsiClass)
+                    variableNamesInsideProject.addAll(variables)
+
+                    var methods = getAllMethodNamesInPSIClassObject(psiJavaFiles.get(i) as PsiClass)
+                    methodNamesInsideProject.addAll(methods)
+
+                    var classes = getAllClassNamesInPSIJavaFile(psiJavaFiles.get(i))
+                    methodNamesInsideProject.addAll(methods)
+                }
+            }
     }
 
     fun collectAllJavPsiFiles(project: Project, rootVirtualFile: VirtualFile): MutableList<PsiJavaFile>? {
@@ -32,6 +52,7 @@ object CodeScanningEngine {
 
         //lambda function with boolean return value so true must be included to continue the iterations
         //This will visit all the child nodes inside the file tree but skip directories and none java files
+
         VfsUtilCore.iterateChildrenRecursively(rootVirtualFile, null) { vf ->
             if (!vf.isDirectory && vf.name.endsWith(".java", ignoreCase = true)) {
                 val psiFile = PsiManager.getInstance(project).findFile(vf) ?: return@iterateChildrenRecursively true
