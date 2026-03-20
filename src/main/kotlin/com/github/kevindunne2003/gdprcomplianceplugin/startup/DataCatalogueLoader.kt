@@ -113,7 +113,7 @@ object DataCatalogueLoader {
     }
 
     //Uses @NlsSafe for the classpath
-    fun loadDataCatalogue(dataCataloguePath: @NlsSafe String?): XSSFRow? {
+    fun loadDataCatalogue(dataCataloguePath: @NlsSafe String?) {
         try {
             FileInputStream("$dataCataloguePath/DataCatalogue.xlsx").use { fis ->
                 val workbook = XSSFWorkbook(fis)
@@ -127,13 +127,12 @@ object DataCatalogueLoader {
             println("Invalid Path")
             e.printStackTrace()
         }
-        return null;
     }
 
     fun run(project: Project) {
         val dataCatalogueClassPath = getDataCataloguePath(project)
 
-        var dataCatalogue1 = loadDataCatalogue(dataCatalogueClassPath)
+        loadDataCatalogue(dataCatalogueClassPath)
 
     }
 }

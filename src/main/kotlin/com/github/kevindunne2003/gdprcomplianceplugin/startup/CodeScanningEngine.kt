@@ -26,7 +26,7 @@ object CodeScanningEngine {
         return classNamesInsideProject
     }
 
-    fun iterateThroughOpenProjectsFileSystem() {
+    fun parseOpenProjectsFileSystem() {
         var project = ProjectManager.getInstance().openProjects[0]
             val rootVirtualFile = project.baseDir ?: return
 
@@ -47,7 +47,7 @@ object CodeScanningEngine {
             }
     }
 
-    fun collectAllJavPsiFiles(project: Project, rootVirtualFile: VirtualFile): MutableList<PsiJavaFile>? {
+    private fun collectAllJavPsiFiles(project: Project, rootVirtualFile: VirtualFile): MutableList<PsiJavaFile>? {
         var psiFiles = mutableListOf<PsiJavaFile>()
 
         //lambda function with boolean return value so true must be included to continue the iterations
@@ -63,7 +63,7 @@ object CodeScanningEngine {
         return psiFiles
     }
 
-    fun getAllClassNamesInPSIJavaFile(psiJavaFile: PsiJavaFile): MutableList<String> {
+    private fun getAllClassNamesInPSIJavaFile(psiJavaFile: PsiJavaFile): MutableList<String> {
         val psiClasses = psiJavaFile.classes
         var classes: MutableList<String> = mutableListOf()
 
@@ -80,7 +80,7 @@ object CodeScanningEngine {
         return classes
     }
 
-    fun getAllMethodNamesInPSIClassObject(psiClass: PsiClass): MutableList<String> {
+    private fun getAllMethodNamesInPSIClassObject(psiClass: PsiClass): MutableList<String> {
         val psiMethods = psiClass.methods
         var methods: MutableList<String> = mutableListOf()
 
@@ -90,9 +90,10 @@ object CodeScanningEngine {
         return methods
     }
 
-    fun getAllVariableNamesInPSIClassObject(psiClass: PsiClass): MutableList<String> {
+    private fun getAllVariableNamesInPSIClassObject(psiClass: PsiClass): MutableList<String> {
         val psiFields = psiClass.fields
         var variables: MutableList<String> = mutableListOf()
+
 
         for (i in 0 until psiFields.size) {
             variables.add(psiFields.get(i).name)

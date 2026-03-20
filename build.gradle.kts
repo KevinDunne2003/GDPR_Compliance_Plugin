@@ -45,6 +45,9 @@ dependencies {
     //Apache POI used for reading excel files
     implementation(libs.apache.poi.ooxml)
 
+    //Used in the java ast implementation
+    implementation("com.github.javaparser:javaparser-core:3.25.10")
+
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
         intellijIdea(providers.gradleProperty("platformVersion"))
