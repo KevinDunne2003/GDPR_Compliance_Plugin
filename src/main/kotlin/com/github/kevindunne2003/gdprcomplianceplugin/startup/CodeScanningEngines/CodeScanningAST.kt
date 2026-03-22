@@ -1,4 +1,4 @@
-package com.github.kevindunne2003.gdprcomplianceplugin.startup
+package com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngines
 
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit

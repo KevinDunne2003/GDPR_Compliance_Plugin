@@ -1,5 +1,5 @@
 package com.github.kevindunne2003.gdprcomplianceplugin
-import com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngine.collectAllJavPsiFiles
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngines.CodeScanningEngine.collectAllJavPsiFiles
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.fixtures.BasePlatformTestCase

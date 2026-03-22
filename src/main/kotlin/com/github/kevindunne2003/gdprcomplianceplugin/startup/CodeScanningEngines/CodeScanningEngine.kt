@@ -1,12 +1,12 @@
-package com.github.kevindunne2003.gdprcomplianceplugin.startup
+package com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngines
 
-import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.*
-import kotlin.collections.mutableListOf
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
 
 object CodeScanningEngine {
 
