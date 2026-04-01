@@ -4,18 +4,12 @@ import com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngine
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.DataCatalogueType
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.PSIType
 import com.intellij.psi.PsiElement
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
+import com.intellij.psi.PsiLocalVariable
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.util.PsiTreeUtil
 
-//With keyword comparisons, the row value will be null. The indexing here is saved in column
-data class ComparisonData(
-    val dataCatName: String,
-    val typeOfDataCatVal: DataCatalogueType,
-    val column: Int,
-    val row: Int? = null,
-    val psiElement: PsiElement,
-    val psiType: PSIType
-)
-
-class CatalogueMatcher {
+object CatalogueMatcher {
 
     private var varsThatMatchDataCat = mutableListOf<ComparisonData>()
     private var paramVarsThatMatchDataCat = mutableListOf<ComparisonData>()
@@ -23,13 +17,24 @@ class CatalogueMatcher {
     private var methodsThatMatchDataCat = mutableListOf<ComparisonData>()
     private var classesThatMatchDataCat = mutableListOf<ComparisonData>()
 
+    private fun clearFieldVariables(){
+        varsThatMatchDataCat.clear()
+        paramVarsThatMatchDataCat.clear()
+        fieldsThatMatchDataCat.clear()
+        methodsThatMatchDataCat.clear()
+        classesThatMatchDataCat.clear()
+    }
+
     fun compareAllPSIObjects() {
-        compareFieldsWithDataCatalogue()
-        compareMethodsWithDataCatalogue()
-        compareClassesWithDataCatalogue()
-        compareLocalVariablesWithDataCatalogue()
+        clearFieldVariables()
+
+        //compareClassesWithDataCatalogue()
+        //compareMethodsWithDataCatalogue()
+        //compareFieldsWithDataCatalogue()
+        //compareLocalVariablesWithDataCatalogue()
         compareParamVariablesWithDataCatalogue()
 
+        printAllFieldVariablesInObjectForTesting()
     }
 
     private fun compareFieldsWithDataCatalogue() {
@@ -107,23 +112,30 @@ class CatalogueMatcher {
         }
     }
 
+   /* private fun compareEnclosingMethodMethodWithDataCatalogueGivenPsiLocalVariable(psiLocalVariable: PsiLocalVariable): ComparisonData {
+        var method = getEnclosingMethod(psiLocalVariable)
+
+        compareKeywordsWithString()
+    }
+
+    private fun compareEnclosingClassWithDataCatalogueGivenPsiLocalVariable(psiLocalVariable: PsiLocalVariable): ComparisonData{
+
+    }*/
 
     private fun compareCatalogueWithStringNames(
         psiElement: PsiElement,
         psiType: PSIType,
-        stringNameOfOject: String,
+        stringNameOfObject: String,
         typeOfDataCatVal: DataCatalogueType
     ) {
         var comparisonData: ComparisonData? = null
 
         if (typeOfDataCatVal == DataCatalogueType.Keyword) {
-            comparisonData = compareKeywordsWithString(stringNameOfOject, psiElement, psiType)
+            comparisonData = compareKeywordsWithString(stringNameOfObject, psiElement, psiType)
         } else if (typeOfDataCatVal == DataCatalogueType.RelatedTerm) {
-            comparisonData = compareRelTermsWithString(stringNameOfOject, psiElement, psiType)
+            comparisonData = compareRelTermsWithString(stringNameOfObject, psiElement, psiType)
         } else if (typeOfDataCatVal == DataCatalogueType.PersonalData) {
-            comparisonData = comparePerDataWithString(stringNameOfOject, psiElement, psiType)
-        } else {
-            println("Invalid int sent to compareCatalogueWithStringNames")
+            comparisonData = comparePerDataWithString(stringNameOfObject, psiElement, psiType)
         }
         if (comparisonData != null) {
             addCompareDataToGlobalVariables(comparisonData)
@@ -145,9 +157,9 @@ class CatalogueMatcher {
     }
 
     //Comparison is to see if the String name of the object contains the data catalogues keyword
-    private fun compareKeywordsWithString(stringNameOfOject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
+    private fun compareKeywordsWithString(stringNameOfObject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
         for (i in 0 until DataCatalogueLoader.getDataCatKeywords().size) {
-            if (lowerCaseAndCompareTwoStrings(stringNameOfOject, DataCatalogueLoader.getDataCatKeywords().get(i))) {
+            if (lowerCaseConversionAndCompareTwoStrings(stringNameOfObject, DataCatalogueLoader.getDataCatKeywords().get(i))) {
                 val comparisonData = ComparisonData(
                     DataCatalogueLoader.getDataCatKeywords().get(i),
                     DataCatalogueType.Keyword, i, psiElement = psiObject, psiType = psiType
@@ -159,11 +171,11 @@ class CatalogueMatcher {
     }
 
     //Comparison is to see if the String name of the object contains the data catalogues keyword
-    private fun compareRelTermsWithString(stringNameOfOject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
+    private fun compareRelTermsWithString(stringNameOfObject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
         for (i in 0 until DataCatalogueLoader.getDataCatRelatedTerms().size) {
             for (j in 0 until DataCatalogueLoader.getDataCatRelatedTerms().get(i).size) {
-                if (lowerCaseAndCompareTwoStrings(
-                        stringNameOfOject,
+                if (lowerCaseConversionAndCompareTwoStrings(
+                        stringNameOfObject,
                         DataCatalogueLoader.getDataCatRelatedTerms().get(i).get(j)
                     )
                 ) {
@@ -183,17 +195,17 @@ class CatalogueMatcher {
         return null
     }
 
-    private fun comparePerDataWithString(stringNameOfOject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
+    private fun comparePerDataWithString(stringNameOfObject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
         for (i in 0 until DataCatalogueLoader.getDataCatPersonalData().size) {
             for (j in 0 until DataCatalogueLoader.getDataCatPersonalData().get(i).size) {
-                if (lowerCaseAndCompareTwoStrings(
-                        stringNameOfOject,
+                if (lowerCaseConversionAndCompareTwoStrings(
+                        stringNameOfObject,
                         DataCatalogueLoader.getDataCatPersonalData().get(i).get(j)
                     )
                 ) {
                     val comparisonData =
                         ComparisonData(
-                            DataCatalogueLoader.getDataCatRelatedTerms().get(i).get(j),
+                            DataCatalogueLoader.getDataCatPersonalData().get(i).get(j),
                             DataCatalogueType.PersonalData,
                             j,
                             i,
@@ -208,69 +220,55 @@ class CatalogueMatcher {
     }
 
     //All data is converted to lowercase for comparisons
-    private fun lowerCaseAndCompareTwoStrings(stringNameOfObject: String, dataCatString: String): Boolean {
+    private fun lowerCaseConversionAndCompareTwoStrings(stringNameOfObject: String, dataCatString: String): Boolean {
         val dataCatLowerCase = dataCatString.lowercase()
-        val stringNameOfOjectLowerCase = stringNameOfObject.lowercase()
+        val stringNameOfObjectLowerCase = stringNameOfObject.lowercase()
 
-        if (stringNameOfOjectLowerCase.contains(dataCatLowerCase)) {
+        if (stringNameOfObjectLowerCase.contains(dataCatLowerCase)) {
             return true
         }
         return false
     }
 
-
-    /*fun compareDataCatKeywordsWithVariableNames() {
-        for (i in 0 until DataCatalogueLoader.getDataCatKeywords().size) {
-            for (j in 0 until CodeScanningEngine.getVariableNamesInsideProject().size) {
-                if (DataCatalogueLoader.getDataCatKeywords().get(i)
-                        .equals(CodeScanningEngine.getVariableNamesInsideProject().get(j), ignoreCase = true)
-                ) {
-                    varNamesThatMatchDataCat.add(
-                        codeType(
-                            CodeScanningEngine.getVariableNamesInsideProject().get(j),
-                            1,
-                            i
-                        )
-                    )
-                }
-            }
-        }
+    fun getEnclosingMethod(psiLocalVariable: PsiLocalVariable): PsiMethod? {
+        return PsiTreeUtil.getParentOfType(psiLocalVariable, PsiMethod::class.java)
     }
 
-    fun compareDataCatKeywordsWithMethodNames() {
-        for (i in 0 until DataCatalogueLoader.getDataCatKeywords().size) {
-            for (j in 0 until CodeScanningEngine.getMethodNamesInsideProject().size) {
-                if (DataCatalogueLoader.getDataCatKeywords().get(i)
-                        .equals(CodeScanningEngine.getMethodNamesInsideProject().get(j), ignoreCase = true)
-                ) {
-                    methodNamesThatMatchDataCat.add(
-                        codeType(
-                            CodeScanningEngine.getMethodNamesInsideProject().get(j),
-                            1,
-                            i
-                        )
-                    )
-                }
-            }
+    private fun printComparisonDataListForTesting(name: String, list: List<ComparisonData>) {
+        println("---- $name ----")
+        if (list.isEmpty()) {
+            println("No entries")
+        } else {
+            list.forEach { println(it) }
         }
+        println()
     }
 
-    fun compareDataCatKeywordsWithClassNames() {
-        for (i in 0 until DataCatalogueLoader.getDataCatKeywords().size) {
-            for (j in 0 until CodeScanningEngine.getClassNamesInsideProject().size) {
-                if (DataCatalogueLoader.getDataCatKeywords().get(i)
-                        .equals(CodeScanningEngine.getClassNamesInsideProject().get(j), ignoreCase = true)
-                ) {
-                    classNamesThatMatchDataCat.add(
-                        codeType(
-                            CodeScanningEngine.getClassNamesInsideProject().get(j),
-                            1,
-                            i
-                        )
-                    )
-                }
-            }
-        }
+    private fun printVarsThatMatchDataCatForTesting() {
+        printComparisonDataListForTesting("varsThatMatchDataCat", varsThatMatchDataCat)
     }
-*/
+
+    private fun printParamVarsThatMatchDataCatForTesting() {
+        printComparisonDataListForTesting("paramVarsThatMatchDataCat", paramVarsThatMatchDataCat)
+    }
+
+    private fun printFieldsThatMatchDataCatForTesting() {
+        printComparisonDataListForTesting("fieldsThatMatchDataCat", fieldsThatMatchDataCat)
+    }
+
+    private fun printMethodsThatMatchDataCatForTesting() {
+        printComparisonDataListForTesting("methodsThatMatchDataCat", methodsThatMatchDataCat)
+    }
+
+    private fun printClassesThatMatchDataCatForTesting() {
+        printComparisonDataListForTesting("classesThatMatchDataCat", classesThatMatchDataCat)
+    }
+
+    private fun printAllFieldVariablesInObjectForTesting(){
+        printVarsThatMatchDataCatForTesting()
+        printParamVarsThatMatchDataCatForTesting()
+        printFieldsThatMatchDataCatForTesting()
+        printMethodsThatMatchDataCatForTesting()
+        printClassesThatMatchDataCatForTesting()
+    }
 }

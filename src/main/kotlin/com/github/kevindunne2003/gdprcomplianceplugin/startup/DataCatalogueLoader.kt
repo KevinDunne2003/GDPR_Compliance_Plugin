@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.NlsSafe
 import java.io.IOException
-import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.FileInputStream
 
@@ -27,7 +26,7 @@ object DataCatalogueLoader {
     }
 
     //Uses @NlsSafe for the classpath
-    fun getDataCataloguePath(project: Project): @NlsSafe String? {
+    fun getDataCataloguePathFromUser(project: Project): @NlsSafe String? {
         val input = Messages.showInputDialog(project, "Enter class path of Data Catalogue", "Run Plugin", null)
 
         if (input.isNullOrEmpty()) return null
@@ -42,9 +41,9 @@ object DataCatalogueLoader {
             val sheet = workbook.getSheetAt(0)
 
             if (sheet.getRow(0) != null && sheet.getRow(0).lastCellNum.toInt() > 0) {
-                for (j in 0..sheet.getRow(0).lastCellNum) {
-                    if (sheet.getRow(0).getCell(j) != null) {
-                        entries.add(sheet.getRow(0).getCell(j).toString())
+                for (j in 0..sheet.lastRowNum) {
+                    if (sheet.getRow(j).getCell(0) != null) {
+                        entries.add(sheet.getRow(j).getCell(0).toString())
                     }
                 }
             } else {
@@ -130,9 +129,34 @@ object DataCatalogueLoader {
     }
 
     fun run(project: Project) {
-        val dataCatalogueClassPath = getDataCataloguePath(project)
+        val dataCatalogueClassPath = getDataCataloguePathFromUser(project)
 
         loadDataCatalogue(dataCatalogueClassPath)
 
+        printDataCatKeywordsForTesting()
+        printDataCatRelatedTermsForTesting()
+        printDataCatPersonalDataForTesting()
+
+    }
+
+    private fun printDataCatKeywordsForTesting() {
+        println("=== Data Catalogue Keywords ===")
+        dataCatKeywords.forEachIndexed { index, keyword ->
+            println("[$index] $keyword")
+        }
+    }
+
+    fun printDataCatRelatedTermsForTesting() {
+        println("=== Data Catalogue Related Terms ===")
+        dataCatRelatedTerms.forEachIndexed { rowIndex, row ->
+            println("Row $rowIndex: ${row.joinToString(", ")}")
+        }
+    }
+
+    fun printDataCatPersonalDataForTesting() {
+        println("=== Data Catalogue Personal Data ===")
+        dataCatPersonalData.forEachIndexed { rowIndex, row ->
+            println("Row $rowIndex: ${row.joinToString(", ")}")
+        }
     }
 }
