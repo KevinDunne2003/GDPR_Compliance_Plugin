@@ -52,22 +52,8 @@ object PSICodeScanningEngine {
 
         if (psiJavaFiles != null) {
             for (i in 0 until psiJavaFiles.size) {
-
                 var classes = getAllClassInPSIJavaFile(psiJavaFiles.get(i))
                 classesInsideProject.addAll(classes)
-
-                /*var methods = getAllMethodInPSIClassObject(psiJavaFiles.get(i) as PsiClass)
-                methodsInsideProject.addAll(methods)
-
-                var variables = getAllVariableInPSIClassObject(psiJavaFiles.get(i) as PsiClass)
-                fieldsInsideProject.addAll(variables)
-
-                var localVariables = getAllLocalVariablesFromMethodsInMethodsInsideProjectFieldVariable()
-                localVariablesInsideProject.addAll(localVariables)
-
-                var parameterVariables = getAllParameterVariablesFromMethodFieldInMethodsInsideProjectFieldVariable()
-                paramVariablesInsideProject.addAll(parameterVariables)*/
-
             }
 
             val methods = getAllMethodsFromClassesInClassesInsideProjectFieldVariable()
@@ -84,12 +70,12 @@ object PSICodeScanningEngine {
         }
     }
 
-    private fun clearAllFileVariablesInClass(){
+    private fun clearAllFileVariablesInClass() {
         localVariablesInsideProject.clear()
         paramVariablesInsideProject.clear()
+        fieldsInsideProject.clear()
         methodsInsideProject.clear()
         classesInsideProject.clear()
-        fieldsInsideProject.clear()
 
     }
 
@@ -124,13 +110,11 @@ object PSICodeScanningEngine {
         return classes
     }
 
-    private fun getAllMethodsFromClassesInClassesInsideProjectFieldVariable():MutableList<PsiMethod>{
+    private fun getAllMethodsFromClassesInClassesInsideProjectFieldVariable(): MutableList<PsiMethod> {
         var methods: MutableList<PsiMethod> = mutableListOf()
 
-        for (i in 0 until classesInsideProject.size) {
-            val psiMethods =
-                PsiTreeUtil.findChildrenOfType(classesInsideProject.get(i), PsiMethod::class.java)
-            methods.addAll(psiMethods)
+        for (psiClass in classesInsideProject) {
+            methods.addAll(psiClass.methods)
         }
 
         return methods
@@ -140,10 +124,8 @@ object PSICodeScanningEngine {
 
         var fieldVariables: MutableList<PsiField> = mutableListOf()
 
-        for (i in 0 until classesInsideProject.size) {
-            val psiFields =
-                PsiTreeUtil.findChildrenOfType(classesInsideProject.get(i), PsiField::class.java)
-            fieldVariables.addAll(psiFields)
+        for (psiClass in classesInsideProject) {
+            fieldVariables.addAll(psiClass.fields)
         }
         return fieldVariables
     }
@@ -189,7 +171,6 @@ object PSICodeScanningEngine {
 
         return variables
     }
-
 
 
     private fun getAllParameterVariablesFromMethodFieldInMethodsInsideProjectFieldVariable(): MutableList<PsiParameter> {

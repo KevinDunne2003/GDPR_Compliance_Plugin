@@ -1,13 +1,18 @@
-package com.github.kevindunne2003.gdprcomplianceplugin.startup
+package com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis
 
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngines.PSICodeScanningEngine
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueLoader
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.DataCatalogueType
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.PSIType
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
-import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
+import com.intellij.psi.PsiField
 import com.intellij.psi.PsiLocalVariable
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
+import java.io.File
 
 object CatalogueMatcher {
 
@@ -17,7 +22,7 @@ object CatalogueMatcher {
     private var methodsThatMatchDataCat = mutableListOf<ComparisonData>()
     private var classesThatMatchDataCat = mutableListOf<ComparisonData>()
 
-    private fun clearFieldVariables(){
+    private fun clearFieldVariables() {
         varsThatMatchDataCat.clear()
         paramVarsThatMatchDataCat.clear()
         fieldsThatMatchDataCat.clear()
@@ -112,15 +117,15 @@ object CatalogueMatcher {
         }
     }
 
-   /* private fun compareEnclosingMethodMethodWithDataCatalogueGivenPsiLocalVariable(psiLocalVariable: PsiLocalVariable): ComparisonData {
-        var method = getEnclosingMethod(psiLocalVariable)
+    /* private fun compareEnclosingMethodMethodWithDataCatalogueGivenPsiLocalVariable(psiLocalVariable: PsiLocalVariable): ComparisonData {
+         var method = getEnclosingMethod(psiLocalVariable)
 
-        compareKeywordsWithString()
-    }
+         compareKeywordsWithString()
+     }
 
-    private fun compareEnclosingClassWithDataCatalogueGivenPsiLocalVariable(psiLocalVariable: PsiLocalVariable): ComparisonData{
+     private fun compareEnclosingClassWithDataCatalogueGivenPsiLocalVariable(psiLocalVariable: PsiLocalVariable): ComparisonData{
 
-    }*/
+     }*/
 
     private fun compareCatalogueWithStringNames(
         psiElement: PsiElement,
@@ -157,9 +162,17 @@ object CatalogueMatcher {
     }
 
     //Comparison is to see if the String name of the object contains the data catalogues keyword
-    private fun compareKeywordsWithString(stringNameOfObject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
+    private fun compareKeywordsWithString(
+        stringNameOfObject: String,
+        psiObject: PsiElement,
+        psiType: PSIType
+    ): ComparisonData? {
         for (i in 0 until DataCatalogueLoader.getDataCatKeywords().size) {
-            if (lowerCaseConversionAndCompareTwoStrings(stringNameOfObject, DataCatalogueLoader.getDataCatKeywords().get(i))) {
+            if (lowerCaseConversionAndCompareTwoStrings(
+                    stringNameOfObject,
+                    DataCatalogueLoader.getDataCatKeywords().get(i)
+                )
+            ) {
                 val comparisonData = ComparisonData(
                     DataCatalogueLoader.getDataCatKeywords().get(i),
                     DataCatalogueType.Keyword, i, psiElement = psiObject, psiType = psiType
@@ -171,7 +184,11 @@ object CatalogueMatcher {
     }
 
     //Comparison is to see if the String name of the object contains the data catalogues keyword
-    private fun compareRelTermsWithString(stringNameOfObject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
+    private fun compareRelTermsWithString(
+        stringNameOfObject: String,
+        psiObject: PsiElement,
+        psiType: PSIType
+    ): ComparisonData? {
         for (i in 0 until DataCatalogueLoader.getDataCatRelatedTerms().size) {
             for (j in 0 until DataCatalogueLoader.getDataCatRelatedTerms().get(i).size) {
                 if (lowerCaseConversionAndCompareTwoStrings(
@@ -195,7 +212,11 @@ object CatalogueMatcher {
         return null
     }
 
-    private fun comparePerDataWithString(stringNameOfObject: String, psiObject: PsiElement, psiType: PSIType): ComparisonData? {
+    private fun comparePerDataWithString(
+        stringNameOfObject: String,
+        psiObject: PsiElement,
+        psiType: PSIType
+    ): ComparisonData? {
         for (i in 0 until DataCatalogueLoader.getDataCatPersonalData().size) {
             for (j in 0 until DataCatalogueLoader.getDataCatPersonalData().get(i).size) {
                 if (lowerCaseConversionAndCompareTwoStrings(
@@ -230,8 +251,27 @@ object CatalogueMatcher {
         return false
     }
 
-    fun getEnclosingMethod(psiLocalVariable: PsiLocalVariable): PsiMethod? {
+    private fun getEnclosingMethod(psiLocalVariable: PsiLocalVariable): PsiMethod? {
         return PsiTreeUtil.getParentOfType(psiLocalVariable, PsiMethod::class.java)
+    }
+
+    //Written by AI for testing purposes
+    private fun getLineNumber(element: PsiElement): Int? {
+        val project = element.project
+
+        val psiFile = element.containingFile ?: return null
+        val document = PsiDocumentManager.getInstance(project).getDocument(psiFile) ?: return null
+
+        PsiDocumentManager.getInstance(project).commitAllDocuments()
+
+        val offset = element.textOffset
+        return document.getLineNumber(offset) + 1
+    }
+
+    //Written by AI for testing purposes
+    private fun getContainingClassName(element: PsiElement): String? {
+        val psiClass = PsiTreeUtil.getParentOfType(element, PsiClass::class.java)
+        return psiClass?.qualifiedName ?: psiClass?.name
     }
 
     private fun printComparisonDataListForTesting(name: String, list: List<ComparisonData>) {
@@ -239,9 +279,112 @@ object CatalogueMatcher {
         if (list.isEmpty()) {
             println("No entries")
         } else {
-            list.forEach { println(it) }
+            list.forEach {
+                val element = it.psiElement
+
+                val line = getLineNumber(element)
+                val className = getContainingClassName(element)
+
+                println(it)
+                println("  -> Line: ${line ?: "unknown"}")
+                println("  -> Class: ${className ?: "unknown"}")
+            }
+
         }
         println()
+    }
+
+    private fun concatenateComparisonDataListForTesting(name: String, list: List<ComparisonData>) {
+        val output = buildString {
+            appendLine("---- $name ----")
+            if (list.isEmpty()) {
+                appendLine("No entries")
+            } else {
+                list.forEach {
+                    val element = it.psiElement
+
+                    val line = getLineNumber(element)
+                    val className = getContainingClassName(element)
+
+                    appendLine(it.toString())
+                    appendLine("  -> Line: ${line ?: "unknown"}")
+                    appendLine("  -> Class: ${className ?: "unknown"}")
+                }
+            }
+            appendLine()
+        }
+
+        saveReportAsTxt(name, output)
+    }
+
+    private fun saveReportAsTxt(name: String, content: String) {
+        val safeName = name.replace("\\s+".toRegex(), "_")
+        val file = File("build/test-output/$safeName.txt")
+
+        file.parentFile.mkdirs()
+        file.writeText(content)
+
+        println("Saved report to: ${file.absolutePath}")
+    }
+
+    //Helped function written by AI for testing
+    private fun findDuplicatePsiElements(): Map<PsiElement, List<ComparisonData>> {
+        val allItems = listOf(
+            varsThatMatchDataCat,
+            paramVarsThatMatchDataCat,
+            fieldsThatMatchDataCat,
+            methodsThatMatchDataCat,
+            classesThatMatchDataCat
+        ).flatten()
+
+        return allItems
+            .groupBy { it.psiElement }
+            .filter { it.value.size > 1 }
+    }
+
+    //Function written by AI for Testing purposes
+    private fun printDuplicateComparisonDataGrouped() {
+        val allItems: List<Pair<String, ComparisonData>> = listOf(
+            "varsThatMatchDataCat" to varsThatMatchDataCat,
+            "paramVarsThatMatchDataCat" to paramVarsThatMatchDataCat,
+            "fieldsThatMatchDataCat" to fieldsThatMatchDataCat,
+            "methodsThatMatchDataCat" to methodsThatMatchDataCat,
+            "classesThatMatchDataCat" to classesThatMatchDataCat
+        ).flatMap { (sourceName, list) ->
+            list.map { sourceName to it }
+        }
+
+        val duplicateGroups: List<List<Pair<String, ComparisonData>>> =
+            allItems
+                .groupBy { it.second.psiElement }
+                .values
+                .filter { it.size > 1 }
+
+        println("---- DUPLICATE PSI ELEMENTS ----")
+
+        if (duplicateGroups.isEmpty()) {
+            println("No duplicate entries")
+            println()
+            return
+        }
+
+        duplicateGroups.forEachIndexed { index, group ->
+            val element = group.first().second.psiElement
+            val line = getLineNumber(element)
+            val className = getContainingClassName(element)
+
+            println("Duplicate Group ${index + 1}")
+            println("  Shared PsiElement text: ${element.text}")
+            println("  -> Line: ${line ?: "unknown"}")
+            println("  -> Class: ${className ?: "unknown"}")
+            println("  Entries:")
+
+            group.forEach { (sourceName, data) ->
+                println("    [$sourceName] $data")
+            }
+
+            println()
+        }
     }
 
     private fun printVarsThatMatchDataCatForTesting() {
@@ -249,7 +392,32 @@ object CatalogueMatcher {
     }
 
     private fun printParamVarsThatMatchDataCatForTesting() {
-        printComparisonDataListForTesting("paramVarsThatMatchDataCat", paramVarsThatMatchDataCat)
+        //printComparisonDataListForTesting("paramVarsThatMatchDataCat", paramVarsThatMatchDataCat)
+        //concatenateComparisonDataListForTesting("paramVarsThatMatchDataCat", paramVarsThatMatchDataCat)
+        printDuplicatePsiElements()
+    }
+    private fun printDuplicatePsiElements() {
+        val duplicates = findDuplicatePsiElements()
+
+        if (duplicates.isEmpty()) {
+            println("No duplicate PsiElements found.")
+            return
+        }
+
+        println("=== Duplicate PsiElements Found ===")
+
+        duplicates.forEach { (psiElement, items) ->
+            println("\nPsiElement: ${psiElement.text}")
+
+            items.forEach { data ->
+                println(
+                    "  -> dataCatName=${data.dataCatName}, " +
+                            "type=${data.typeOfDataCatVal}, " +
+                            "row=${data.row}, column=${data.column}, " +
+                            "psiType=${data.psiType}"
+                )
+            }
+        }
     }
 
     private fun printFieldsThatMatchDataCatForTesting() {
@@ -264,11 +432,37 @@ object CatalogueMatcher {
         printComparisonDataListForTesting("classesThatMatchDataCat", classesThatMatchDataCat)
     }
 
-    private fun printAllFieldVariablesInObjectForTesting(){
-        printVarsThatMatchDataCatForTesting()
-        printParamVarsThatMatchDataCatForTesting()
-        printFieldsThatMatchDataCatForTesting()
-        printMethodsThatMatchDataCatForTesting()
-        printClassesThatMatchDataCatForTesting()
+    private fun printAllFieldVariablesInObjectForTesting() {
+        //printVarsThatMatchDataCatForTesting()
+        //printParamVarsThatMatchDataCatForTesting()
+        printDuplicateComparisonDataGrouped()
+        //printFieldsThatMatchDataCatForTesting()
+        //printMethodsThatMatchDataCatForTesting()
+        //printClassesThatMatchDataCatForTesting()
+    }
+
+    fun checkIfFieldVariableIsInfieldsThatMatchDataCat(psiField: PsiField): Boolean {
+        for(fieldInGlobalVariable in fieldsThatMatchDataCat){
+            if(fieldInGlobalVariable.psiElement.isEquivalentTo(psiField)){
+                return true
+            }
+        }
+        return false
+    }
+
+    fun getVarsThatMatchDataCat(): MutableList<ComparisonData> {
+        return varsThatMatchDataCat
+    }
+    fun getParamVarsThatMatchDataCat(): MutableList<ComparisonData> {
+        return paramVarsThatMatchDataCat
+    }
+    fun getFieldsThatMatchDataCat(): MutableList<ComparisonData> {
+        return fieldsThatMatchDataCat
+    }
+    fun getMethodsThatMatchDataCat(): MutableList<ComparisonData>{
+        return methodsThatMatchDataCat
+    }
+    fun getClassesThatMatchDataCat(): MutableList<ComparisonData>{
+        return classesThatMatchDataCat
     }
 }

@@ -133,9 +133,9 @@ object DataCatalogueLoader {
 
         loadDataCatalogue(dataCatalogueClassPath)
 
-        printDataCatKeywordsForTesting()
-        printDataCatRelatedTermsForTesting()
-        printDataCatPersonalDataForTesting()
+        //printDataCatKeywordsForTesting()
+        //printDataCatRelatedTermsForTesting()
+        //printDataCatPersonalDataForTesting()
 
     }
 

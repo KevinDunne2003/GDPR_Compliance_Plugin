@@ -1,5 +1,7 @@
 package com.github.kevindunne2003.gdprcomplianceplugin.startup
 
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis.CatalogueMatchFilter
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis.CatalogueMatcher
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngines.PSICodeScanningEngine
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -13,5 +15,8 @@ class RunPluginTool: AnAction("Run Plugin") {
         DataCatalogueLoader.run(project)
         PSICodeScanningEngine.parseOpenProjectsFileSystem()
         CatalogueMatcher.compareAllPSIObjects()
+        CatalogueMatchFilter.gatewayMethod()
+
+        println("Code Finished")
     }
 }
