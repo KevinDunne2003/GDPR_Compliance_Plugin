@@ -10,6 +10,8 @@ import java.io.FileInputStream
 object DataCatalogueLoader {
 
     private var dataCatKeywords = mutableListOf<String>()
+    //Outer list references the row
+    //Inner list references the column
     private var dataCatRelatedTerms = mutableListOf<MutableList<String>>()
     private var dataCatPersonalData = mutableListOf<MutableList<String>>()
 

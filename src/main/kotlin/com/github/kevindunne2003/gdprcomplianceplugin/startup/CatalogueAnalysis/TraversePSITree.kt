@@ -37,14 +37,15 @@ object TraversePSITree {
     private var methodsThatMatchDataCatPassingDataToParameter = mutableListOf<ComparisonData>()
     private var generatedViolationData = mutableListOf<ViolationData>()
 
-    fun gatewayFunction(psiParameter: PsiParameter, paramComparisonData: ComparisonData) {
-        originalPsiParameterComparisonData
+    fun gatewayFunction(psiParameter: PsiParameter, paramComparisonData: ComparisonData): MutableList<ViolationData> {
         methodsThatMatchDataCatPassingDataToParameter.clear()
 
         originalPsiParameterComparisonData = paramComparisonData
         traverseTreeToFindPossibleInfractions(psiParameter)
 
         generateViolationDataFromFieldVariables()
+        return generatedViolationData
+
     }
 
     private fun generateViolationDataFromFieldVariables() {
@@ -52,7 +53,9 @@ object TraversePSITree {
             val originalParamData = originalPsiParameterComparisonData
             if (originalParamData != null) {
                 val violationData = CatalogueMatchFilter.generateViolationData(originalParamData, methodCompData)
-                generatedViolationData.add(violationData)
+                if(!generatedViolationData.contains(violationData)){
+                    generatedViolationData.add(violationData)
+                }
             }
         }
     }
@@ -64,7 +67,7 @@ object TraversePSITree {
     private fun traverseTreeToFindPossibleInfractions(psiParameter: PsiParameter) {
         val psiMethod = PsiTreeUtil.getParentOfType(psiParameter, PsiMethod::class.java)
         val methodInPsiMethodNameMatchesMethodsThatMatchDataCat =
-            checkIfPsiMethodNameMatchesMethodsThatMatchDataCat(psiMethod)
+            findComparisonDataForMatchedMethod(psiMethod)
 
         if (methodInPsiMethodNameMatchesMethodsThatMatchDataCat != null) {
             methodsThatMatchDataCatPassingDataToParameter.add(methodInPsiMethodNameMatchesMethodsThatMatchDataCat)
@@ -94,7 +97,7 @@ object TraversePSITree {
                     //Double check this cast, not sure it is correct
                     val argument = getArgumentAtIndex(methodCallExpression, paramIndex) as? PsiExpression ?: continue
                     //val variable = resolveArgumentExpressionToSingleVariable(argument)
-                    processArgumentExpression(argument)
+                     processArgumentExpression(argument)
 
                     /*if (variable != null && argument != null) {
                         val assignedVariable =
@@ -116,7 +119,9 @@ object TraversePSITree {
     private fun processArgumentExpression(argument: PsiExpression) {
         when (val expr = unwrapExpression(argument)) {
             is PsiMethodCallExpression -> {
-                //dealWithMethodCall(expr)
+                checkMethodCall(expr)
+                //Do we just check to see if this method is already in our list?
+                //Not completely sure if this completes the correct check here
             }
 
             is PsiReferenceExpression -> {
@@ -124,7 +129,8 @@ object TraversePSITree {
                     is PsiField -> {
                         //dealWithFieldVariable(resolved)
                         if (CatalogueMatcher.checkIfFieldVariableIsInfieldsThatMatchDataCat(resolved)) {
-                            //Match to the catalogue, so log this
+                            //If we have a match for a field variable here, we dont have a match to the method.
+                            //This means there is no Processing activity
                         }
                     }
 
@@ -132,14 +138,16 @@ object TraversePSITree {
                         val assigned = findLastAssignedValueBeforeUsage(resolved, expr)
                         if (assigned != null) {
                             handleAssignedExpression(assigned)
-                        } else {
+                        } /*else {
                             resolved.initializer?.let { handleAssignedExpression(it) }
-                        }
+                        }*/
                     }
                 }
             }
 
-            else -> {
+            //Means it is a collection of multiple variables or something else
+            //Currently don't do anything if it is not a collection of variables
+            /*else -> {
                 val variables = collectVariablesFromArgumentExpression(expr)
 
                 if (variables.isEmpty()) {
@@ -160,20 +168,19 @@ object TraversePSITree {
                             val assigned = findLastAssignedValueBeforeUsage(variable, argument)
                             if (assigned != null) {
                                 handleAssignedExpression(assigned)
-                            } else {
+                            } /*else {
                                 variable.initializer?.let { handleAssignedExpression(it) }
-                            }
+                            }*/
                         }
                     }
                 }
             }
+            */
         }
     }
 
 
     private fun handleAssignedExpression(expression: PsiExpression) {
-        if (expression == null) return
-
         //Checks hardcoded variable, forget this
         if (expression is PsiLiteralExpression) {
             return
@@ -191,7 +198,7 @@ object TraversePSITree {
 
             if (resolved is PsiField) {
                 if (CatalogueMatcher.checkIfFieldVariableIsInfieldsThatMatchDataCat(resolved)) {
-                    //Match to the catalogue, so log this
+                    //Should we log this?
                 }
                 return
             }
@@ -202,15 +209,14 @@ object TraversePSITree {
                 return
             }
 
-            // Optional: local variable case: rechecks where the last time that variable was assigned
             if (resolved is PsiLocalVariable) {
                 val assigned = findLastAssignedValueBeforeUsage(resolved, expression)
 
                 if (assigned != null) {
                     handleAssignedExpression(assigned)
-                } else {
+                } /*else {
                     resolved.initializer?.let { handleAssignedExpression(it) }
-                }
+                }*/
                 return
             }
         }
@@ -376,7 +382,7 @@ object TraversePSITree {
         }
     }
 
-    private fun checkIfPsiMethodNameMatchesMethodsThatMatchDataCat(psiMethod: PsiMethod?): ComparisonData? {
+    private fun findComparisonDataForMatchedMethod(psiMethod: PsiMethod?): ComparisonData? {
         for (methodThatMatchesDataCat in CatalogueMatcher.getMethodsThatMatchDataCat()) {
             val psiMethodThatMatchesDataCat = methodThatMatchesDataCat.psiElement as PsiMethod
             if (CatalogueMatchFilter.areSameMethod(psiMethodThatMatchesDataCat, psiMethod)) {
@@ -467,7 +473,7 @@ object TraversePSITree {
     private fun checkMethodCall(methodCallExpression: PsiMethodCallExpression) {
         val calledMethod = methodCallExpression.resolveMethod() ?: return
         val methodInPsiMethodNameMatchesMethodsThatMatchDataCat =
-            checkIfPsiMethodNameMatchesMethodsThatMatchDataCat(calledMethod)
+            findComparisonDataForMatchedMethod(calledMethod)
 
         if (methodInPsiMethodNameMatchesMethodsThatMatchDataCat != null) {
             methodsThatMatchDataCatPassingDataToParameter.add(methodInPsiMethodNameMatchesMethodsThatMatchDataCat)

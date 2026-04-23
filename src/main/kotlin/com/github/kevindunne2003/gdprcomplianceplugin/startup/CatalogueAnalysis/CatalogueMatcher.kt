@@ -33,13 +33,19 @@ object CatalogueMatcher {
     fun compareAllPSIObjects() {
         clearFieldVariables()
 
-        //compareClassesWithDataCatalogue()
-        //compareMethodsWithDataCatalogue()
-        //compareFieldsWithDataCatalogue()
-        //compareLocalVariablesWithDataCatalogue()
+        compareClassesWithDataCatalogue()
+        compareMethodsWithDataCatalogue()
+        compareFieldsWithDataCatalogue()
+        compareLocalVariablesWithDataCatalogue()
         compareParamVariablesWithDataCatalogue()
 
-        printAllFieldVariablesInObjectForTesting()
+        println("Num Of vars: "+ varsThatMatchDataCat.size)
+        println("Num of params: "+ paramVarsThatMatchDataCat.size)
+        println("Num of fields: "+ fieldsThatMatchDataCat.size)
+        println("Num of methods: "+ methodsThatMatchDataCat.size)
+        println("Num of classes: "+classesThatMatchDataCat.size)
+
+        //printAllFieldVariablesInObjectForTesting()
     }
 
     private fun compareFieldsWithDataCatalogue() {
@@ -433,12 +439,12 @@ object CatalogueMatcher {
     }
 
     private fun printAllFieldVariablesInObjectForTesting() {
-        //printVarsThatMatchDataCatForTesting()
-        //printParamVarsThatMatchDataCatForTesting()
-        printDuplicateComparisonDataGrouped()
-        //printFieldsThatMatchDataCatForTesting()
-        //printMethodsThatMatchDataCatForTesting()
-        //printClassesThatMatchDataCatForTesting()
+        printVarsThatMatchDataCatForTesting()
+        printParamVarsThatMatchDataCatForTesting()
+        //printDuplicateComparisonDataGrouped()
+        printFieldsThatMatchDataCatForTesting()
+        printMethodsThatMatchDataCatForTesting()
+        printClassesThatMatchDataCatForTesting()
     }
 
     fun checkIfFieldVariableIsInfieldsThatMatchDataCat(psiField: PsiField): Boolean {

@@ -13,6 +13,7 @@ import com.intellij.psi.PsiParameter
 import com.intellij.psi.PsiReference
 import com.intellij.psi.PsiReferenceExpression
 import com.intellij.psi.PsiReturnStatement
+import com.intellij.psi.PsiVariable
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiUtil
@@ -22,7 +23,7 @@ object CatalogueMatchFilter {
     private var filteredFieldVariablesAndMethodsThatContainViolations = mutableListOf<ViolationData>()
     private var filteredParamVariablesAndMethodsThatContainViolations = mutableListOf<ViolationData>()
 
-    fun gatewayMethod(){
+    fun gatewayMethod() {
         clearAllFieldVariables()
         findAllVarsAndTheirMethodsThatMatchDataCat()
         findAllFieldVariablesAndTheMethodsTheirAreReferencedThatMatchDataCat()
@@ -31,7 +32,7 @@ object CatalogueMatchFilter {
         printFieldVariablesForTesting()
     }
 
-    private fun clearAllFieldVariables(){
+    private fun clearAllFieldVariables() {
         filteredLocalVariablesAndMethodsThatContainViolations.clear()
         filteredFieldVariablesAndMethodsThatContainViolations.clear()
         filteredParamVariablesAndMethodsThatContainViolations.clear()
@@ -41,15 +42,16 @@ object CatalogueMatchFilter {
         filteredLocalVariablesAndMethodsThatContainViolations.clear()
         for (localVariableComparisonData in CatalogueMatcher.getVarsThatMatchDataCat()) {
             for (methodComparisonData in CatalogueMatcher.getMethodsThatMatchDataCat()) {
+
                 val methodThatContainsLocalVariable =
                     getPsiMethodObjectFromPsiLocalVariable(localVariableComparisonData.psiElement as PsiLocalVariable)
                 if (areSameMethod(methodComparisonData.psiElement as PsiMethod, methodThatContainsLocalVariable)) {
-                    filteredLocalVariablesAndMethodsThatContainViolations.add(
-                        ViolationData(
-                            localVariableComparisonData,
-                            methodComparisonData
-                        )
-                    )
+
+                    val violationData = ViolationData(localVariableComparisonData,
+                        methodComparisonData)
+                    if(!mutableListAlreadyContainsViolationData(filteredLocalVariablesAndMethodsThatContainViolations, violationData)){
+                        filteredLocalVariablesAndMethodsThatContainViolations.add(violationData)
+                    }
                 }
             }
         }
@@ -61,17 +63,17 @@ object CatalogueMatchFilter {
         for (fieldVariableComparisonData in CatalogueMatcher.getFieldsThatMatchDataCat()) {
             val fieldReferences = findAllReferencesOfPSIField(fieldVariableComparisonData.psiElement as PsiField)
             //Not sure if .distinct() would work in this case, so I created a helper function to use the areSameMethod function
-            val containingMethodsOfFields = excludeDuplicateMethods(findAllContainingMethodsOfFieldReferences(fieldReferences))
+            val containingMethodsOfFields =
+                excludeDuplicateMethods(findAllContainingMethodsOfFieldReferences(fieldReferences))
 
             for (methodComparisonData in CatalogueMatcher.getMethodsThatMatchDataCat()) {
                 for (method in containingMethodsOfFields) {
                     if (areSameMethod(methodComparisonData.psiElement as PsiMethod, method)) {
-                        filteredFieldVariablesAndMethodsThatContainViolations.add(
-                            generateViolationData(
-                                fieldVariableComparisonData,
-                                methodComparisonData
-                            )
-                        )
+                        val violationData = ViolationData(fieldVariableComparisonData,methodComparisonData)
+                        if(!mutableListAlreadyContainsViolationData(filteredFieldVariablesAndMethodsThatContainViolations, violationData)){
+                            filteredFieldVariablesAndMethodsThatContainViolations.add(violationData)
+                        }
+
                         break
                     }
                 }
@@ -79,17 +81,19 @@ object CatalogueMatchFilter {
         }
     }
 
-    private fun findAllParamVariablesAndTheMethodsTheirAreReferencedThatMatchDataCat(){
+    private fun findAllParamVariablesAndTheMethodsTheirAreReferencedThatMatchDataCat() {
         filteredParamVariablesAndMethodsThatContainViolations.clear()
-        for (paramVariable in CatalogueMatcher.getParamVarsThatMatchDataCat()){
-            TraversePSITree.gatewayFunction(paramVariable.psiElement as PsiParameter, paramVariable)
-            for(violationData in TraversePSITree.getGeneratedViolationData()){
-                filteredParamVariablesAndMethodsThatContainViolations.add(violationData)
+        for (paramVariable in CatalogueMatcher.getParamVarsThatMatchDataCat()) {
+            var violationDataList =
+                TraversePSITree.gatewayFunction(paramVariable.psiElement as PsiParameter, paramVariable)
+            for (violationData in violationDataList) {
+                if(!mutableListAlreadyContainsViolationData(filteredParamVariablesAndMethodsThatContainViolations, violationData)){
+                    filteredParamVariablesAndMethodsThatContainViolations.add(violationData)
+                }
             }
         }
 
     }
-
 
     private fun getPsiMethodObjectFromPsiLocalVariable(psiVariable: PsiLocalVariable): PsiMethod? {
         return PsiTreeUtil.getParentOfType(psiVariable, PsiMethod::class.java)
@@ -101,13 +105,14 @@ object CatalogueMatchFilter {
         return PsiManager.getInstance(method1.project).areElementsEquivalent(method1, method2)
     }
 
-    private fun excludeDuplicateMethods(methods: MutableList<PsiMethod>): MutableList<PsiMethod>{
+    private fun excludeDuplicateMethods(methods: MutableList<PsiMethod>): MutableList<PsiMethod> {
         val result = mutableListOf<PsiMethod>()
 
-        for(method in methods){
-            val alreadyExists = result.any{existing -> areSameMethod(existing,method)
+        for (method in methods) {
+            val alreadyExists = result.any { existing ->
+                areSameMethod(existing, method)
             }
-            if(!alreadyExists){
+            if (!alreadyExists) {
                 result.add(method)
             }
         }
@@ -127,7 +132,7 @@ object CatalogueMatchFilter {
         for (fieldReferences in fieldReferences) {
             val containingMethod = getContainingMethodOfPsiReference(fieldReferences)
             if (containingMethod != null) {
-                containingMethod.add(containingMethod)
+                containingMethods.add(containingMethod)
             }
         }
         return containingMethods
@@ -179,35 +184,47 @@ object CatalogueMatchFilter {
         return returnValue != null && PsiTreeUtil.isAncestor(returnValue, returnStatementElement, false)
     }
 
+    fun getFilteredLocalVariablesAndMethodsThatContainViolations(): MutableList<ViolationData> {
+        return filteredLocalVariablesAndMethodsThatContainViolations
+    }
+
+    fun getFilteredFieldVariablesAndMethodsThatContainViolations(): MutableList<ViolationData> {
+        return filteredFieldVariablesAndMethodsThatContainViolations
+    }
+    fun getFilteredParamVariablesAndMethodsThatContainViolations(): MutableList<ViolationData> {
+        return filteredParamVariablesAndMethodsThatContainViolations
+    }
+
     //Print statements were written using LLMs
-    private fun printFieldVariablesForTesting(){
+    private fun printFieldVariablesForTesting() {
         printFieldVarsForTesting()
         printVariableForTesting()
         printParametersForTesting()
     }
 
-    private fun printFieldVarsForTesting(){
-            println("=== Field Variable Violations ===")
-            println("Total number of entries: "+ filteredFieldVariablesAndMethodsThatContainViolations.size)
-            filteredFieldVariablesAndMethodsThatContainViolations.forEach {
-                printViolationData(it)
-            }
+    private fun printFieldVarsForTesting() {
+        println("=== Field Variable Violations ===")
+        println("Total number of entries: " + filteredFieldVariablesAndMethodsThatContainViolations.size)
+        /*filteredFieldVariablesAndMethodsThatContainViolations.forEach {
+            printViolationData(it)
+        }*/
 
     }
-    private fun printVariableForTesting(){
-            println("=== Local Variable Violations ===")
-            println("Total number of entries: "+ filteredLocalVariablesAndMethodsThatContainViolations.size)
-            filteredLocalVariablesAndMethodsThatContainViolations.forEach {
-                printViolationData(it)
-            }
-        }
 
-    private fun printParametersForTesting(){
-        println("=== Parameter Variable Violations ===")
-        println("Total number of entries: "+ filteredParamVariablesAndMethodsThatContainViolations.size)
-        filteredParamVariablesAndMethodsThatContainViolations.forEach {
+    private fun printVariableForTesting() {
+        println("=== Local Variable Violations ===")
+        println("Total number of entries: " + filteredLocalVariablesAndMethodsThatContainViolations.size)
+        /*filteredLocalVariablesAndMethodsThatContainViolations.forEach {
             printViolationData(it)
-        }
+        }*/
+    }
+
+    private fun printParametersForTesting() {
+        println("=== Parameter Variable Violations ===")
+        println("Total number of entries: " + filteredParamVariablesAndMethodsThatContainViolations.size)
+        /*filteredParamVariablesAndMethodsThatContainViolations.forEach {
+            printViolationData(it)
+        }*/
     }
 
     private fun printViolationData(violation: ViolationData) {
@@ -231,5 +248,15 @@ object CatalogueMatchFilter {
         println("  PSI Type: ${methodData.psiType}")
 
         println("-------------------")
+    }
+
+    private fun mutableListAlreadyContainsViolationData(
+        mutableList: MutableList<ViolationData>,
+        violationData: ViolationData
+    ): Boolean {
+        return mutableList.any {
+            it.comparisonDataOfVar == violationData.comparisonDataOfVar &&
+                    it.comparisonDataOfMethod == violationData.comparisonDataOfMethod
+        }
     }
 }

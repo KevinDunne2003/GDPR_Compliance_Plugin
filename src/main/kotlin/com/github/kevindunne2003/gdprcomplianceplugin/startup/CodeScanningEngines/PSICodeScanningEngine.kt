@@ -52,7 +52,7 @@ object PSICodeScanningEngine {
 
         if (psiJavaFiles != null) {
             for (i in 0 until psiJavaFiles.size) {
-                var classes = getAllClassInPSIJavaFile(psiJavaFiles.get(i))
+                var classes = getAllClassesInPSIJavaFile(psiJavaFiles.get(i))
                 classesInsideProject.addAll(classes)
             }
 
@@ -68,6 +68,8 @@ object PSICodeScanningEngine {
             var parameters = getAllParameterVariablesFromMethodFieldInMethodsInsideProjectFieldVariable()
             paramVariablesInsideProject.addAll(parameters)
         }
+
+        //printCountOfEachFieldVariable()
     }
 
     private fun clearAllFileVariablesInClass() {
@@ -95,7 +97,7 @@ object PSICodeScanningEngine {
         return psiFiles
     }
 
-    private fun getAllClassInPSIJavaFile(psiJavaFile: PsiJavaFile): MutableList<PsiClass> {
+    private fun getAllClassesInPSIJavaFile(psiJavaFile: PsiJavaFile): MutableList<PsiClass> {
         val psiClasses = psiJavaFile.classes
         var classes: MutableList<PsiClass> = mutableListOf()
 
@@ -227,5 +229,14 @@ object PSICodeScanningEngine {
             variables.add(psiFields.get(i).name)
         }
         return variables
+    }
+
+    private fun printCountOfEachFieldVariable(){
+        println("CountOfEachFieldVariable")
+        println("Methods: " + methodsInsideProject.size)
+        println("Classes: "+ classesInsideProject.size)
+        println("Variables: "+ localVariablesInsideProject.size)
+        println("Parameters: "+ paramVariablesInsideProject.size)
+        println("Fields: "+ fieldsInsideProject.size)
     }
 }
