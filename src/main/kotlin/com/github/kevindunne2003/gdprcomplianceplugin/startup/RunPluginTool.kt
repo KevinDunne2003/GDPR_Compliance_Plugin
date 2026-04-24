@@ -18,8 +18,8 @@ class RunPluginTool: AnAction("Run Plugin") {
         PSICodeScanningEngine.parseOpenProjectsFileSystem()
         CatalogueMatcher.compareAllPSIObjects()
         CatalogueMatchFilter.gatewayMethod()
-        //MapViolationToPrinciple.mapAllViolationsToPrinciples()
-        //ViolationExcelExporter.exportViolationMatch()
+        MapViolationToPrinciple.mapAllViolationsToPrinciples()
+        ViolationExcelExporter.exportViolationMatch()
 
         println("Code Finished")
     }

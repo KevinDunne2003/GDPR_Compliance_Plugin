@@ -2,7 +2,9 @@ package com.github.kevindunne2003.gdprcomplianceplugin.startup
 
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ViolationPrincipleMatch
+import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiNamedElement
 import org.apache.poi.ss.usermodel.BorderStyle
@@ -12,6 +14,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
@@ -59,7 +62,7 @@ object ViolationExcelExporter {
         rowIndex = writeSection(
             sheet = sheet,
             startRow = rowIndex,
-            sectionTitle = "Field Violations",
+            sectionTitle = "Field Variable Violations",
             matches = fieldViolations,
             titleStyle = titleStyle,
             headerStyle = headerStyle
@@ -70,13 +73,13 @@ object ViolationExcelExporter {
         rowIndex = writeSection(
             sheet = sheet,
             startRow = rowIndex,
-            sectionTitle = "Parameter Violations",
+            sectionTitle = "Parameter Variable Violations",
             matches = parameterViolations,
             titleStyle = titleStyle,
             headerStyle = headerStyle
         )
 
-        for (i in 0..15) {
+        for (i in 0..12) {
             sheet.autoSizeColumn(i)
         }
 
@@ -106,19 +109,18 @@ object ViolationExcelExporter {
             "Violation 1",
             "Violation 2",
 
-            "Var dataCatName",
-            "Var typeOfDataCatVal",
-            "Var column",
-            "Var row",
-            "Var psiType",
-            "Var psiIdentifier",
+            "dataCatName",
+            "typeOfDataCatVal",
+            "column",
+            "row",
+            "psiIdentifier",
 
-            "Method dataCatName",
-            "Method typeOfDataCatVal",
-            "Method column",
-            "Method row",
-            "Method psiType",
-            "Method psiIdentifier"
+            "dataCatName",
+            "typeOfDataCatVal",
+            "column",
+            "row",
+            "psiIdentifier",
+            "Containing Class"
         )
 
         headers.forEachIndexed { index, header ->
@@ -145,7 +147,7 @@ object ViolationExcelExporter {
             val methodData = match.violationData.comparisonDataOfMethod
 
             writeComparisonData(row, startColumn = 2, comparisonData = varData)
-            writeComparisonData(row, startColumn = 8, comparisonData = methodData)
+            writeMethodComparisonData(row, startColumn = 7, comparisonData = methodData)
         }
 
         return rowIndex
@@ -160,8 +162,28 @@ object ViolationExcelExporter {
         row.createCell(startColumn + 1).setCellValue(comparisonData.typeOfDataCatVal.name)
         row.createCell(startColumn + 2).setCellValue(comparisonData.column.toDouble())
         row.createCell(startColumn + 3).setCellValue(comparisonData.row?.toDouble() ?: -1.0)
-        row.createCell(startColumn + 4).setCellValue(comparisonData.psiType.name)
-        row.createCell(startColumn + 5).setCellValue(getPsiIdentifier(comparisonData.psiElement))
+        row.createCell(startColumn + 4).setCellValue(getPsiIdentifier(comparisonData.psiElement))
+    }
+
+    private fun writeMethodComparisonData(
+        row: Row,
+        startColumn: Int,
+        comparisonData: ComparisonData
+    ) {
+        row.createCell(startColumn).setCellValue(comparisonData.dataCatName)
+        row.createCell(startColumn + 1).setCellValue(comparisonData.typeOfDataCatVal.name)
+        row.createCell(startColumn + 2).setCellValue(comparisonData.column.toDouble())
+        row.createCell(startColumn + 3).setCellValue(comparisonData.row?.toDouble() ?: -1.0)
+        row.createCell(startColumn + 4).setCellValue(getPsiIdentifier(comparisonData.psiElement))
+        row.createCell(startColumn + 5).setCellValue(getContainingClassName(comparisonData.psiElement))
+    }
+
+    private fun getContainingClassName(element: PsiElement): String {
+        val method = element as? PsiMethod ?: return ""
+        val containingClass: PsiClass? = method.containingClass
+        return containingClass?.qualifiedName
+            ?: containingClass?.name
+            ?: ""
     }
 
     private fun getPsiIdentifier(element: PsiElement): String {
