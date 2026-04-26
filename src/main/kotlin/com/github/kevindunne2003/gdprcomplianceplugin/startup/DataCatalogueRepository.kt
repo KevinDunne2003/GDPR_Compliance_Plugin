@@ -7,23 +7,24 @@ import java.io.IOException
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.FileInputStream
 
-object DataCatalogueLoader {
+object DataCatalogueRepository {
 
     private var dataCatKeywords = mutableListOf<String>()
+
     //Outer list references the row
     //Inner list references the column
     private var dataCatRelatedTerms = mutableListOf<MutableList<String>>()
     private var dataCatPersonalData = mutableListOf<MutableList<String>>()
 
-    fun getDataCatKeywords(): MutableList<String> {
+    fun getDataCatalogueKeywords(): MutableList<String> {
         return dataCatKeywords
     }
 
-    fun getDataCatRelatedTerms(): MutableList<MutableList<String>> {
+    fun getDataCatalogueRelatedTerms(): MutableList<MutableList<String>> {
         return dataCatRelatedTerms
     }
 
-    fun getDataCatPersonalData(): MutableList<MutableList<String>> {
+    fun getDataCataloguePersonalData(): MutableList<MutableList<String>> {
         return dataCatPersonalData
     }
 
@@ -36,7 +37,7 @@ object DataCatalogueLoader {
     }
 
     //Can return an empty list if the data inside is invalid
-    fun loadDataCatKeywords(workbook: XSSFWorkbook): MutableList<String> {
+    fun loadDataCatalogueKeywords(workbook: XSSFWorkbook): MutableList<String> {
         val entries = mutableListOf<String>()
 
         try {
@@ -60,7 +61,7 @@ object DataCatalogueLoader {
     }
 
     //Can return an empty list if the data inside is invalid
-    fun loadDataCatRelatedTerms(workbook: XSSFWorkbook): MutableList<MutableList<String>> {
+    fun loadDataCatalogueRelatedTerms(workbook: XSSFWorkbook): MutableList<MutableList<String>> {
         val entries = mutableListOf<MutableList<String>>()
 
         try {
@@ -88,7 +89,7 @@ object DataCatalogueLoader {
         return entries
     }
 
-    fun loadDataCatPersonalData(workbook: XSSFWorkbook): MutableList<MutableList<String>> {
+    fun loadDataCataloguePersonalData(workbook: XSSFWorkbook): MutableList<MutableList<String>> {
         val entries = mutableListOf<MutableList<String>>()
         try {
             val sheet = workbook.getSheetAt(2)
@@ -119,9 +120,9 @@ object DataCatalogueLoader {
             FileInputStream("$dataCataloguePath/DataCatalogue.xlsx").use { fis ->
                 val workbook = XSSFWorkbook(fis)
 
-                dataCatKeywords = loadDataCatKeywords(workbook)
-                dataCatRelatedTerms = loadDataCatRelatedTerms(workbook)
-                dataCatPersonalData = loadDataCatPersonalData(workbook)
+                dataCatKeywords = loadDataCatalogueKeywords(workbook)
+                dataCatRelatedTerms = loadDataCatalogueRelatedTerms(workbook)
+                dataCatPersonalData = loadDataCataloguePersonalData(workbook)
 
             }
         } catch (e: IOException) {

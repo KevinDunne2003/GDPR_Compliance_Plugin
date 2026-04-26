@@ -8,6 +8,8 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 
+//Not used in the final version of this plugin
+
 object CodeScanningEngine {
 
     private var variableNamesInsideProject = mutableListOf<String>()

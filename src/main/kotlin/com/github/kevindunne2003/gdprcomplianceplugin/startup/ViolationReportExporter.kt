@@ -2,6 +2,7 @@ package com.github.kevindunne2003.gdprcomplianceplugin.startup
 
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ViolationPrincipleMatch
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.Priority
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
@@ -14,20 +15,19 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
 
-object ViolationExcelExporter {
+object ViolationReportExporter {
 
     fun exportViolationMatch() {
         val outputFile = File("C:\\Year 4\\Final Year Project\\Results\\gdpr-violation-matches.xlsx")
 
         exportViolationMatches(
-            variableViolations = MapViolationToPrinciple.getVariableViolationsMappedToPrinciples(),
-            fieldViolations = MapViolationToPrinciple.getFieldViolationsMappedToPrinciples(),
-            parameterViolations = MapViolationToPrinciple.getParamViolationsMappedToPrinciples(),
+            variableViolations = ViolationPrincipleMapper.getVariableViolationsMappedToPrinciples(),
+            fieldViolations = ViolationPrincipleMapper.getFieldViolationsMappedToPrinciples(),
+            parameterViolations = ViolationPrincipleMapper.getParamViolationsMappedToPrinciples(),
             outputFile = outputFile
         )
 
@@ -79,7 +79,7 @@ object ViolationExcelExporter {
             headerStyle = headerStyle
         )
 
-        for (i in 0..12) {
+        for (i in 0..14) {
             sheet.autoSizeColumn(i)
         }
 
@@ -103,23 +103,27 @@ object ViolationExcelExporter {
         val titleRow = sheet.createRow(rowIndex++)
         titleRow.createCell(0).setCellValue(sectionTitle)
         titleRow.getCell(0).cellStyle = titleStyle
+        titleRow.createCell(8).setCellValue("Containing Method")
+        titleRow.getCell(8).cellStyle = titleStyle
 
         val headerRow = sheet.createRow(rowIndex++)
         val headers = listOf(
             "Violation 1",
             "Violation 2",
 
-            "dataCatName",
-            "typeOfDataCatVal",
-            "column",
-            "row",
-            "psiIdentifier",
+            "DataCatName",
+            "Priority",
+            "TypeOfDataCatVal",
+            "Column",
+            "Row",
+            "PsiIdentifier",
 
-            "dataCatName",
-            "typeOfDataCatVal",
-            "column",
-            "row",
-            "psiIdentifier",
+            "DataCatName",
+            "Priority",
+            "TypeOfDataCatVal",
+            "Column",
+            "Row",
+            "PsiIdentifier",
             "Containing Class"
         )
 
@@ -147,7 +151,7 @@ object ViolationExcelExporter {
             val methodData = match.violationData.comparisonDataOfMethod
 
             writeComparisonData(row, startColumn = 2, comparisonData = varData)
-            writeMethodComparisonData(row, startColumn = 7, comparisonData = methodData)
+            writeMethodComparisonData(row, startColumn = 8, comparisonData = methodData)
         }
 
         return rowIndex
@@ -159,10 +163,11 @@ object ViolationExcelExporter {
         comparisonData: ComparisonData
     ) {
         row.createCell(startColumn).setCellValue(comparisonData.dataCatName)
-        row.createCell(startColumn + 1).setCellValue(comparisonData.typeOfDataCatVal.name)
-        row.createCell(startColumn + 2).setCellValue(comparisonData.column.toDouble())
-        row.createCell(startColumn + 3).setCellValue(comparisonData.row?.toDouble() ?: -1.0)
-        row.createCell(startColumn + 4).setCellValue(getPsiIdentifier(comparisonData.psiElement))
+        row.createCell(startColumn + 1).setCellValue(calculatePersonalDataPriority(comparisonData.row ?: -1).name)
+        row.createCell(startColumn + 2).setCellValue(comparisonData.typeOfDataCatVal.name)
+        row.createCell(startColumn + 3).setCellValue(comparisonData.column.toDouble())
+        row.createCell(startColumn + 4).setCellValue(comparisonData.row?.toDouble() ?: 0.0)
+        row.createCell(startColumn + 5).setCellValue(getPsiIdentifier(comparisonData.psiElement))
     }
 
     private fun writeMethodComparisonData(
@@ -171,11 +176,30 @@ object ViolationExcelExporter {
         comparisonData: ComparisonData
     ) {
         row.createCell(startColumn).setCellValue(comparisonData.dataCatName)
-        row.createCell(startColumn + 1).setCellValue(comparisonData.typeOfDataCatVal.name)
-        row.createCell(startColumn + 2).setCellValue(comparisonData.column.toDouble())
-        row.createCell(startColumn + 3).setCellValue(comparisonData.row?.toDouble() ?: -1.0)
-        row.createCell(startColumn + 4).setCellValue(getPsiIdentifier(comparisonData.psiElement))
-        row.createCell(startColumn + 5).setCellValue(getContainingClassName(comparisonData.psiElement))
+        row.createCell(startColumn + 1).setCellValue(calculateKeywordPriority(comparisonData.row ?: -1).name)
+        row.createCell(startColumn + 2).setCellValue(comparisonData.typeOfDataCatVal.name)
+        row.createCell(startColumn + 3).setCellValue(comparisonData.column.toDouble())
+        row.createCell(startColumn + 4).setCellValue(comparisonData.row?.toDouble() ?: -1.0)
+        row.createCell(startColumn + 5).setCellValue(getPsiIdentifier(comparisonData.psiElement))
+        row.createCell(startColumn + 6).setCellValue(getContainingClassName(comparisonData.psiElement))
+    }
+
+    private fun calculatePersonalDataPriority(priorityValue: Int): Priority {
+        return when (priorityValue) {
+            1 -> Priority.High
+            8 -> Priority.Low
+            in 2..7 -> Priority.Medium
+            else -> Priority.Medium
+        }
+    }
+
+    private fun calculateKeywordPriority(priorityValue: Int): Priority {
+        return when (priorityValue) {
+            1, 7 -> Priority.Low
+            2, 3, 5 -> Priority.Medium
+            4, 6 -> Priority.High
+            else -> Priority.Medium
+        }
     }
 
     private fun getContainingClassName(element: PsiElement): String {

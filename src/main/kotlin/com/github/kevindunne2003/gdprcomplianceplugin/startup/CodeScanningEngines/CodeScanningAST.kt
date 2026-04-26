@@ -10,6 +10,8 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import java.nio.charset.StandardCharsets
 
+//Not used in the final version of this tool
+
 object CodeScanningAST {
     private var variableNamesInsideProject = mutableListOf<String>()
     private var methodNamesInsideProject = mutableListOf<String>()

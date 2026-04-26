@@ -6,7 +6,7 @@ import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.Principles
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ViolationData
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ViolationPrincipleMatch
 
-object MapViolationToPrinciple {
+object ViolationPrincipleMapper {
 
     private var variableViolationsMappedToPrinciples: MutableList<ViolationPrincipleMatch> = mutableListOf()
     private var fieldViolationsMappedToPrinciples: MutableList<ViolationPrincipleMatch> = mutableListOf()
@@ -94,7 +94,7 @@ object MapViolationToPrinciple {
 
     private fun mapRelatedTermToKeyword(rowNum: Int?): String? {
         if (rowNum != null) {
-            var keywords = DataCatalogueLoader.getDataCatKeywords()
+            var keywords = DataCatalogueRepository.getDataCatalogueKeywords()
 
             return keywords.get(rowNum)
         }

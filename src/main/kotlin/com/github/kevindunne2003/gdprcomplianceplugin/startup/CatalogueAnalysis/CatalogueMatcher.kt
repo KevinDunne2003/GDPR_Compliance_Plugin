@@ -1,7 +1,7 @@
 package com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis
 
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngines.PSICodeScanningEngine
-import com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueLoader
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueRepository
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.DataCatalogueType
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.PSIType
@@ -173,14 +173,14 @@ object CatalogueMatcher {
         psiObject: PsiElement,
         psiType: PSIType
     ): ComparisonData? {
-        for (i in 0 until DataCatalogueLoader.getDataCatKeywords().size) {
+        for (i in 0 until DataCatalogueRepository.getDataCatalogueKeywords().size) {
             if (lowerCaseConversionAndCompareTwoStrings(
                     stringNameOfObject,
-                    DataCatalogueLoader.getDataCatKeywords().get(i)
+                    DataCatalogueRepository.getDataCatalogueKeywords().get(i)
                 )
             ) {
                 val comparisonData = ComparisonData(
-                    DataCatalogueLoader.getDataCatKeywords().get(i),
+                    DataCatalogueRepository.getDataCatalogueKeywords().get(i),
                     DataCatalogueType.Keyword, i, psiElement = psiObject, psiType = psiType
                 )
                 return comparisonData
@@ -195,16 +195,16 @@ object CatalogueMatcher {
         psiObject: PsiElement,
         psiType: PSIType
     ): ComparisonData? {
-        for (i in 0 until DataCatalogueLoader.getDataCatRelatedTerms().size) {
-            for (j in 0 until DataCatalogueLoader.getDataCatRelatedTerms().get(i).size) {
+        for (i in 0 until DataCatalogueRepository.getDataCatalogueRelatedTerms().size) {
+            for (j in 0 until DataCatalogueRepository.getDataCatalogueRelatedTerms().get(i).size) {
                 if (lowerCaseConversionAndCompareTwoStrings(
                         stringNameOfObject,
-                        DataCatalogueLoader.getDataCatRelatedTerms().get(i).get(j)
+                        DataCatalogueRepository.getDataCatalogueRelatedTerms().get(i).get(j)
                     )
                 ) {
                     val comparisonData =
                         ComparisonData(
-                            DataCatalogueLoader.getDataCatRelatedTerms().get(i).get(j),
+                            DataCatalogueRepository.getDataCatalogueRelatedTerms().get(i).get(j),
                             DataCatalogueType.RelatedTerm,
                             j,
                             i,
@@ -223,16 +223,16 @@ object CatalogueMatcher {
         psiObject: PsiElement,
         psiType: PSIType
     ): ComparisonData? {
-        for (i in 0 until DataCatalogueLoader.getDataCatPersonalData().size) {
-            for (j in 0 until DataCatalogueLoader.getDataCatPersonalData().get(i).size) {
+        for (i in 0 until DataCatalogueRepository.getDataCataloguePersonalData().size) {
+            for (j in 0 until DataCatalogueRepository.getDataCataloguePersonalData().get(i).size) {
                 if (lowerCaseConversionAndCompareTwoStrings(
                         stringNameOfObject,
-                        DataCatalogueLoader.getDataCatPersonalData().get(i).get(j)
+                        DataCatalogueRepository.getDataCataloguePersonalData().get(i).get(j)
                     )
                 ) {
                     val comparisonData =
                         ComparisonData(
-                            DataCatalogueLoader.getDataCatPersonalData().get(i).get(j),
+                            DataCatalogueRepository.getDataCataloguePersonalData().get(i).get(j),
                             DataCatalogueType.PersonalData,
                             j,
                             i,
