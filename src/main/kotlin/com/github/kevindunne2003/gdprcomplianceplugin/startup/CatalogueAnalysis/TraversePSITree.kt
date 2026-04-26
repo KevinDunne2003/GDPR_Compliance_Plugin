@@ -37,7 +37,7 @@ object TraversePSITree {
     private var methodsThatMatchDataCatPassingDataToParameter = mutableListOf<ComparisonData>()
     private var generatedViolationData = mutableListOf<ViolationData>()
 
-    fun gatewayFunction(psiParameter: PsiParameter, paramComparisonData: ComparisonData): MutableList<ViolationData> {
+    fun locateAllPossibleViolationsForAParameterVariable(psiParameter: PsiParameter, paramComparisonData: ComparisonData): MutableList<ViolationData> {
         methodsThatMatchDataCatPassingDataToParameter.clear()
 
         originalPsiParameterComparisonData = paramComparisonData

@@ -1,9 +1,7 @@
 package com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis
 
-import com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis.CatalogueMatchFilter.filteredLocalVariablesAndMethodsThatContainViolations
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ViolationData
-import com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis.TraversePSITree
 import com.intellij.psi.PsiExpressionList
 import com.intellij.psi.PsiField
 import com.intellij.psi.PsiLocalVariable
@@ -13,7 +11,6 @@ import com.intellij.psi.PsiParameter
 import com.intellij.psi.PsiReference
 import com.intellij.psi.PsiReferenceExpression
 import com.intellij.psi.PsiReturnStatement
-import com.intellij.psi.PsiVariable
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiUtil
@@ -23,7 +20,7 @@ object CatalogueMatchFilter {
     private var filteredFieldVariablesAndMethodsThatContainViolations = mutableListOf<ViolationData>()
     private var filteredParamVariablesAndMethodsThatContainViolations = mutableListOf<ViolationData>()
 
-    fun gatewayMethod() {
+    fun generateCatalogeMatchFilteredValues() {
         clearAllFieldVariables()
         findAllVarsAndTheirMethodsThatMatchDataCat()
         findAllFieldVariablesAndTheMethodsTheirAreReferencedThatMatchDataCat()
@@ -85,7 +82,7 @@ object CatalogueMatchFilter {
         filteredParamVariablesAndMethodsThatContainViolations.clear()
         for (paramVariable in CatalogueMatcher.getParamVarsThatMatchDataCat()) {
             var violationDataList =
-                TraversePSITree.gatewayFunction(paramVariable.psiElement as PsiParameter, paramVariable)
+                TraversePSITree.locateAllPossibleViolationsForAParameterVariable(paramVariable.psiElement as PsiParameter, paramVariable)
             for (violationData in violationDataList) {
                 if(!mutableListAlreadyContainsViolationData(filteredParamVariablesAndMethodsThatContainViolations, violationData)){
                     filteredParamVariablesAndMethodsThatContainViolations.add(violationData)

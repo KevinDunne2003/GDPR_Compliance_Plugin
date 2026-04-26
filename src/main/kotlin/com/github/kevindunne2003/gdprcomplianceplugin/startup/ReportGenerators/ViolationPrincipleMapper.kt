@@ -1,6 +1,7 @@
-package com.github.kevindunne2003.gdprcomplianceplugin.startup
+package com.github.kevindunne2003.gdprcomplianceplugin.startup.ReportGenerators
 
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis.CatalogueMatchFilter
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueValues.DataCatalogueRepository
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.DataCatalogueType
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.Principles
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ViolationData
@@ -23,7 +24,7 @@ object ViolationPrincipleMapper {
         for(entries in filteredFieldVariablesAndMethodsThatContainViolations){
             val principlesMatches = mapViolationDataToPrinciple(entries)
             if(principlesMatches != null) {
-                fieldViolationsMappedToPrinciples.add(ViolationPrincipleMatch(principlesMatches,entries))
+                fieldViolationsMappedToPrinciples.add(ViolationPrincipleMatch(principlesMatches, entries))
             }
         }
     }
@@ -34,7 +35,7 @@ object ViolationPrincipleMapper {
         for(entries in filteredLocalVariablesAndMethodsThatContainViolations) {
             val principlesMatches = mapViolationDataToPrinciple(entries)
             if(principlesMatches != null) {
-                variableViolationsMappedToPrinciples.add(ViolationPrincipleMatch(principlesMatches,entries))
+                variableViolationsMappedToPrinciples.add(ViolationPrincipleMatch(principlesMatches, entries))
             }
         }
     }

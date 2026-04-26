@@ -4,25 +4,100 @@
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
-## Template ToDo list
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate) for the first time.
-- [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains Marketplace.
-- [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate) related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
-- [ ] Set the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html?from=IJPluginTemplate).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
-- [ ] Configure the [CODECOV_TOKEN](https://docs.codecov.com/docs/quick-start) secret for automated test coverage reports on PRs
-
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+## Running and Testing the Plugin
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
+This project must be opened in IntelliJ IDEA.
 
-To keep everything working, do not remove `<!-- ... -->` sections. 
+Open the plugin project in IntelliJ IDEA as a normal Gradle-based project. Once IntelliJ has finished loading the project and Gradle has finished syncing, open a terminal inside IntelliJ IDEA.
+
+The terminal can be opened from inside IntelliJ IDEA using the built-in terminal window.
+
+From the terminal inside IntelliJ IDEA, run the following command:
+
+```bash
+./gradlew runIde
+```
+
+This command starts a new development instance of IntelliJ IDEA.
+
+The development instance is a separate IntelliJ IDEA window that runs with this plugin installed. This allows the plugin to be tested without installing it into your main IntelliJ IDEA environment.
+
+---
+
+## Opening a Test Project
+
+Once the development instance starts, a new IntelliJ IDEA window will appear.
+
+You will be prompted with a window asking you to open a project.
+
+To test the plugin under the same parameters used during this project, download the FenixEdu Academic project from the following GitHub repository:
+
+https://github.com/FenixEdu/fenixedu-academic
+
+After downloading the FenixEdu Academic project, open it inside the development IntelliJ IDEA instance.
+
+The plugin should be run against this project, not against the plugin project itself.
+
+---
+
+## Running the GDPR Compliance Plugin
+
+After the FenixEdu Academic project has been opened in the development IntelliJ IDEA instance, run the plugin from the IntelliJ IDEA menu.
+
+To do this:
+
+1. Click the main menu option at the top-left of the IDE.
+2. Click **Tools**.
+3. Click **Run GDPR Compliance Plugin**.
+
+This will start the plugin.
+
+---
+
+## Selecting the Data Catalogue
+
+After clicking **Run GDPR Compliance Plugin**, a window will appear asking for the location of the data catalogue on your local file system.
+
+You must provide the local file system path to the data catalogue.
+
+The data catalogue file must be named exactly:
+
+```text
+DataCatalogue.xlsx
+```
+
+The plugin expects this exact file name. If the file is named differently, the plugin may not run correctly.
+
+---
+
+## Running the Analysis
+
+Once the data catalogue has been selected, the plugin will begin running against the project that is currently open in the development IntelliJ IDEA instance.
+
+The time taken for the plugin to complete depends on:
+
+- the size of the project being analysed
+- the size of the data catalogue
+- the number of code elements scanned
+- the number of possible matches and violations detected
+
+Larger systems and larger data catalogues may take longer to analyse. During the testing involved in this project, the analysis took approximately 20 minutes to run.
+
+---
+
+## Exported Results
+
+When the plugin has finished running, the results are exported to the following directory:
+
+```text
+src/main/resources/reports
+```
+
+## Final Remarks
+
+Inside startup/ReportGenerators/ViolationReportExporter, there is a path to where the results will be exported to. Please change this to the location on your local machine you would like the report to be exported to
+ 
 <!-- Plugin description end -->
 
 ## Installation

@@ -1,7 +1,7 @@
 package com.github.kevindunne2003.gdprcomplianceplugin.startup.CatalogueAnalysis
 
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.CodeScanningEngines.PSICodeScanningEngine
-import com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueRepository
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueValues.DataCatalogueRepository
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.DataCatalogueType
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.PSIType

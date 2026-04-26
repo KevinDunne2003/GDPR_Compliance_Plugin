@@ -1,8 +1,8 @@
-package com.github.kevindunne2003.gdprcomplianceplugin.startup
+package com.github.kevindunne2003.gdprcomplianceplugin.startup.ReportGenerators
 
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ComparisonData
-import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ViolationPrincipleMatch
 import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.Priority
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.Objects.ViolationPrincipleMatch
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
@@ -22,6 +22,8 @@ import java.io.FileOutputStream
 object ViolationReportExporter {
 
     fun exportViolationMatch() {
+
+        //Please change this to the path you want the results to be exported
         val outputFile = File("C:\\Year 4\\Final Year Project\\Results\\gdpr-violation-matches.xlsx")
 
         exportViolationMatches(

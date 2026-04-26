@@ -1,31 +1,31 @@
-package com.github.kevindunne2003.gdprcomplianceplugin.startup
+package com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueValues
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.NlsSafe
-import java.io.IOException
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.FileInputStream
+import java.io.IOException
 
 object DataCatalogueRepository {
 
-    private var dataCatKeywords = mutableListOf<String>()
+    private var dataCatalogueKeywords = mutableListOf<String>()
 
     //Outer list references the row
     //Inner list references the column
-    private var dataCatRelatedTerms = mutableListOf<MutableList<String>>()
-    private var dataCatPersonalData = mutableListOf<MutableList<String>>()
+    private var dataCatalogueRelatedTerms = mutableListOf<MutableList<String>>()
+    private var dataCataloguePersonalData = mutableListOf<MutableList<String>>()
 
     fun getDataCatalogueKeywords(): MutableList<String> {
-        return dataCatKeywords
+        return dataCatalogueKeywords
     }
 
     fun getDataCatalogueRelatedTerms(): MutableList<MutableList<String>> {
-        return dataCatRelatedTerms
+        return dataCatalogueRelatedTerms
     }
 
     fun getDataCataloguePersonalData(): MutableList<MutableList<String>> {
-        return dataCatPersonalData
+        return dataCataloguePersonalData
     }
 
     //Uses @NlsSafe for the classpath
@@ -120,9 +120,9 @@ object DataCatalogueRepository {
             FileInputStream("$dataCataloguePath/DataCatalogue.xlsx").use { fis ->
                 val workbook = XSSFWorkbook(fis)
 
-                dataCatKeywords = loadDataCatalogueKeywords(workbook)
-                dataCatRelatedTerms = loadDataCatalogueRelatedTerms(workbook)
-                dataCatPersonalData = loadDataCataloguePersonalData(workbook)
+                dataCatalogueKeywords = loadDataCatalogueKeywords(workbook)
+                dataCatalogueRelatedTerms = loadDataCatalogueRelatedTerms(workbook)
+                dataCataloguePersonalData = loadDataCataloguePersonalData(workbook)
 
             }
         } catch (e: IOException) {
@@ -144,21 +144,21 @@ object DataCatalogueRepository {
 
     private fun printDataCatKeywordsForTesting() {
         println("=== Data Catalogue Keywords ===")
-        dataCatKeywords.forEachIndexed { index, keyword ->
+        dataCatalogueKeywords.forEachIndexed { index, keyword ->
             println("[$index] $keyword")
         }
     }
 
     fun printDataCatRelatedTermsForTesting() {
         println("=== Data Catalogue Related Terms ===")
-        dataCatRelatedTerms.forEachIndexed { rowIndex, row ->
+        dataCatalogueRelatedTerms.forEachIndexed { rowIndex, row ->
             println("Row $rowIndex: ${row.joinToString(", ")}")
         }
     }
 
     fun printDataCatPersonalDataForTesting() {
         println("=== Data Catalogue Personal Data ===")
-        dataCatPersonalData.forEachIndexed { rowIndex, row ->
+        dataCataloguePersonalData.forEachIndexed { rowIndex, row ->
             println("Row $rowIndex: ${row.joinToString(", ")}")
         }
     }

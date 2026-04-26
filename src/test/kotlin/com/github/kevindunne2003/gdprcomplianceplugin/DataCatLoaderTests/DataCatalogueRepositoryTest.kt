@@ -1,6 +1,6 @@
 package com.github.kevindunne2003.gdprcomplianceplugin
 
-import com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueRepository
+import com.github.kevindunne2003.gdprcomplianceplugin.startup.DataCatalogueValues.DataCatalogueRepository
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
