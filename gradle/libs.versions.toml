@@ -6,7 +6,7 @@ poi = "5.4.0"
 
 # plugins
 changelog = "2.5.0"
-intelliJPlatform = "2.10.5"
+intelliJPlatform = "2.19.0"
 kotlin = "2.2.21"
 kover = "0.9.3"
 qodana = "2025.2.2"
